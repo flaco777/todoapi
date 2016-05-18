@@ -1,3 +1,5 @@
+//cd c:\users\jared\dropbox (personal)\programming\_node\todo-api
+
 var express = require('express');
 var bodyParser = require("body-parser");
 var _ = require("underscore");
@@ -12,20 +14,23 @@ app.get('/', function (req, res) {
 	res.send('Todo API Root');
 });
 
-// GET /todos
+// GET /todos?completed=false&q=work
 app.get('/todos', function (req, res) {
 	var queryParams = req.query;
 	var filteredTodos = todos;
 
 	if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
 		filteredTodos = _.where(filteredTodos, {completed: true});
-		res.json(filteredTodos);
 	} else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
 		filteredTodos = _.where(filteredTodos, {completed: false});
-		res.json(filteredTodos);
-	} else {
+	} 
+
+	if(queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
+		filteredTodos = _.filter(filteredTodos, function(x){return (x.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) !== -1 )});
+		//res.json(_.indexOf(filteredTodos.description, queryParams.q) !== -1);
+	}
+
 	res.json(filteredTodos);
-};
 });
 
 // GET /todos/:id
