@@ -26,16 +26,17 @@ app.get('/todos', function(req, res) {
 		where.completed = false;
 	}
 
-
 	if (query.hasOwnProperty('q') && query.q.length > 0) {
 		where.description = {
-				$like: '%' + query.q + '%'
-			};
+			$like: '%' + query.q + '%'
+		};
 	}
 
-	db.todo.findAll({where: where}).then(function (todos) {
+	db.todo.findAll({
+		where: where
+	}).then(function(todos) {
 		res.json(todos);
-	}, function (e) {
+	}, function(e) {
 		res.status(500).send();
 	});
 });
