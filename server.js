@@ -15,47 +15,44 @@ app.get('/', function(req, res) {
 	res.send('Todo API Root');
 });
 
-// GET /todos?completed=false&q=work
+// GET /todos?completed=T/F&q=term
 app.get('/todos', function(req, res) {
 	var query = req.query;
 	var where = {};
 
+	if (query.hasOwnProperty('completed') && query.completed === 'true') {
+		where.completed = true;
+	} else if (query.hasOwnProperty('completed') && query.completed === 'false') {
+		where.completed = false;
+	}
 
 
-	// var filteredTodos = todos;
+	if (query.hasOwnProperty('q') && query.q.length > 0) {
+		where.description = {
+				$like: '%' + query.q + '%'
+			};
+	}
 
-	// if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
-	// 	filteredTodos = _.where(filteredTodos, {
-	// 		completed: true
-	// 	});
-	// } else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
-	// 	filteredTodos = _.where(filteredTodos, {
-	// 		completed: false
-	// 	});
-	// }
-
-	// if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
-	// 	filteredTodos = _.filter(filteredTodos, function(x) {
-	// 		return (x.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) !== -1)
-	// 	});
-	// 	//res.json(_.indexOf(filteredTodos.description, queryParams.q) !== -1);
-	// }
-	// res.json(filteredTodos);
+	db.todo.findAll({where: where}).then(function (todos) {
+		res.json(todos);
+	}, function (e) {
+		res.status(500).send();
+	});
 });
 
 // GET /todos/:id
 app.get('/todos/:id', function(req, res) {
 	var todoID = parseInt(req.params.id, 10);
 
-	db.todo.findById(todoID).then(function (todo) {
+	db.todo.findById(todoID).then(function(todo) {
 		if (!!todo) {
 			res.json(todo.toJSON());
 		} else {
 			res.status(404).send();
 		}
-	}, function (e) {
-			res.status(500).send();
-	});
+	}).catch(function(e) {
+		res.status(500).send();
+	})
 });
 
 
@@ -132,6 +129,7 @@ app.put("/todos/:id", function(req, res) {
 
 });
 
+//Sync all changes to DB
 db.sequelize.sync().then(function() {
 	app.listen(PORT, function() {
 		console.log("Express listening on port " + PORT + "!");
