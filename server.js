@@ -12,7 +12,7 @@ var todoNextID = 1;
 app.use(bodyParser.json());
 
 app.get('/', function(req, res) {
-	res.send('Todo API Root');
+	res.send('Hi babe, welcome to my webpage');
 });
 
 // GET /todos?completed=T/F&q=term
@@ -85,19 +85,40 @@ app.post("/todos", function(req, res) {
 //DELETE /todos/:id
 app.delete("/todos/:id", function(req, res) {
 	var todoID = parseInt(req.params.id, 10);
-	var matchedTodo = _.findWhere(todos, {
-		id: todoID
-	});
 
-	if (!matchedTodo) {
-		res.status(404).json({
-			"error": "no todo found with that ID."
-		})
-	} else {
-		todos = _.without(todos, matchedTodo)
-		res.status(200).send("The following todo item has been deleted:\n" + JSON.stringify(matchedTodo));
-	}
+	db.todo.findById(todoID).then(function(todo) {
+		if (!!todo) {
+			deleted = db.todo.findById(todoID)
+			todo.destroy({
+				where: {
+					id: todoID
+				}
+			}).then(function(deleted) {
+				res.status(200).send('The following todo item has been deleted:\n' + JSON.stringify(deleted))
+			})
+		} else {
+			res.status(404).json({
+				"error": "no todo found with that ID."
+			})
+		}
+	});
 });
+
+
+
+// var matchedTodo = _.findWhere(todos, {
+// 	id: todoID
+// });
+
+// if (!matchedTodo) {
+// 	res.status(404).json({
+// 		"error": "no todo found with that ID."
+// 	})
+// } else {
+// 	todos = _.without(todos, matchedTodo)
+// 	res.status(200).send("The following todo item has been deleted:\n" + JSON.stringify(matchedTodo));
+// }
+
 
 //PUT /todos/:id
 app.put("/todos/:id", function(req, res) {
