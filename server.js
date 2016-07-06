@@ -66,19 +66,6 @@ app.post("/todos", function(req, res) {
 	}).catch(function(e) {
 		res.status(400).json(e);
 	})
-
-
-	// if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
-	// 	return res.status(400).send();
-	// }
-
-	// body.description = body.description.trim();
-	// // set body.description to the trimmed value
-
-
-	// body.id = todoNextID++;
-	// todos.push(body);
-	// res.json(todos);
 });
 
 
@@ -150,6 +137,16 @@ app.put("/todos/:id", function(req, res) {
 		}
 	}, function() {
 		res.status(500).send();
+	})
+});
+
+app.post('/users', function(req, res) {
+	var body = _.pick(req.body, 'email', 'password');
+
+	db.user.create(body).then(function(user) {
+		res.json(user.toJSON());
+	}, function(e) {
+		res.status(400).json(e);
 	})
 });
 
